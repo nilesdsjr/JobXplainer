@@ -6,10 +6,12 @@ from datetime import datetime
 
 
 class Settings:
+    def __init__(self, root_file=__file__):
 
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    CONFIG_PATH = os.path.join(
-        os.path.abspath(os.path.join(ROOT_DIR, os.pardir)), 'resources')
+        self.ROOT_DIR = os.path.dirname(os.path.abspath(root_file))
+        self.CONFIG_PATH = os.path.join(
+            os.path.abspath(os.path.join(self.ROOT_DIR, os.pardir)),
+            'resources')
 
     def set_kinit(self):
 
@@ -47,6 +49,7 @@ class LogStream:
         handler.setFormatter(formatter)
         root.addHandler(handler)
         root.info('Logging Handler para ' + origin + ' adicionado!')
+
         return root
 
 
@@ -78,13 +81,19 @@ class Configuration:
         path_config_file = os.path.join(path_config, _path_config_file[0])
 
         try:
+
             with open(path_config_file, 'rb') as yml:
+
                 config = yaml.safe_load(yml)
+
         except Exception as e:
 
             log.error('Carregamento de arquivo yaml falhou. Confira em ' +
-                      path_config)
+                      path_config,
+                      exec_info=True)
+
             raise (e)
 
         log.info('Arquivo de configuration carregado.')
+
         return config
