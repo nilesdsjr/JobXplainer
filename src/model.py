@@ -16,16 +16,11 @@ class Model:
     _config = Configuration()
     config = _config.load_config(path_config=settings.CONFIG_PATH)
 
-    print(config['profile']['hive']['jdbc']['database'])
-    print(config['profile']['hive']['jdbc']['driver'])
-    print(config['profile']['hive']['jdbc']['server'])
-    print(config['profile']['hive']['jdbc']['principal'])
-    print(config['profile']['hive']['jdbc']['port'])
-
-    def __init__(self, sql_file=sql_file, sql_dir=sql_dir):
+    def __init__(self, sql_file=sql_file, sql_dir=sql_dir, log=log):
 
         self.sql_file = sql_file
         self.sql_dir = sql_dir
+        self.log = log
 
     def get_sql_dir(self):
 
@@ -33,23 +28,50 @@ class Model:
 
     def get_sql_files(self, path_sql_dir=sql_dir):
 
-        _dir_ls = os.scandir(path_sql_dir)
-        dir_ls = []
-        for path in list(_dir_ls):
-            dir_ls.append(os.path.join(path_sql_dir, path.name))
+        self.log.info('Iniciando busca por arquivos sql em ' + path_sql_dir)
 
-        dir_ls.sort(key=os.path.getctime)
-        path_sql_files = [
-            file for file in dir_ls if re.search(".sql$", file, re.IGNORECASE)
-        ]
+        if os.path.exists(path_sql_dir) and os.path.isdir(path_sql_dir):
 
-        return path_sql_files
+            if not os.listdir(path_sql_dir):
+
+                self.log.error(
+                    "Diretório para arquivos sql está vazio. Indique o diretório correto e reinicie o jobXplainer."
+                )
+                raise (ValueError())
+
+            else:
+
+                _dir_ls = os.scandir(path_sql_dir)
+                dir_ls = [(os.path.join(path_sql_dir, path.name))
+                          for path in list(_dir_ls)]
+                dir_ls.sort(key=os.path.getctime, reverse=True)
+                path_sql_files = [
+                    file for file in dir_ls
+                    if re.search(".sql$", file, re.IGNORECASE)
+                ]
+
+                return path_sql_files
+
+        else:
+
+            self.log.error(
+                "Diretório para arquivos sql não existe. Indique o diretório correto e reinicie o jobXplainer."
+            )
+            raise (ValueError())
 
     def get_query(self, sql_file):
 
-        with open(sql_file, 'r') as f:
+        try:
 
-            sql = f.read()
+            with open(sql_file, 'r') as f:
+                sql = f.read()
+            f.close()
+
+        except Exception as e:
+
+            self.log.error('Erro crítico ao tentar abrir arquivo sql.',
+                           exec_info=True)
+            raise (e)
 
         return sql
 
@@ -70,4 +92,5 @@ class Model:
         sql = "select * from item limit 10"
         cursor.execute(sql)
         results = cursor.fetchall()
+
         return results
