@@ -1,0 +1,19 @@
+---
+application : jobXplainer
+version: 1
+runtime: python3
+api_version: 1
+minimum_version: 1.0
+
+profile:
+  hive:
+    jdbc:
+      database: testtdb
+      driver: org.apache.hive.jdbc.HiveDriver
+      server: 192.168.200.100
+      principal: hive/example.domain.com@DOMAIN.COM.
+      port: 10000
+  logging:
+    specify_path: False
+    path_to_file:
+  kerberos:
