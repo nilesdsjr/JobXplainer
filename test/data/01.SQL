@@ -1,0 +1,1 @@
+SELECT * FROM uo.tboualsjfhasdl_temp WHERE anomes = 201807;
