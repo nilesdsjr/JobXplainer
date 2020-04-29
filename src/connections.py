@@ -1,28 +1,24 @@
 import jaydebeapi
+from singleton import Singleton
 
-class HiveConnection:
 
-    database='testtdb'
-    driver='org.apache.hive.jdbc.HiveDriver'
-    server='192.168.200.100'
-    principal='hive/example.domain.com@DOMAIN.COM.'
-    port=10000
+@Singleton
+class HiveConnection(object):
+    def __init__(self, config):
 
-    # JDBC connection string
-    url=("jdbc:hive2://" + server + ":" + str(port)
-    + "/"+ database +";principal=" + principal + ";")
+        self.database = config['profile']['hive']['jdbc']['database']
+        self.driver = config['profile']['hive']['jdbc']['driver']
+        self.server = config['profile']['hive']['jdbc']['server']
+        self.principal = config['profile']['hive']['jdbc']['principal']
+        self.port = config['profile']['hive']['jdbc']['port']
 
-    #Connect to HiveServer2 
-    def hive2conn(self, url=url):
+        # JDBC connection string
+        self.url = ("jdbc:hive2://" + self.server + ":" + str(self.port) +
+                    "/" + self.database + ";principal=" + self.principal + ";")
 
-        conn=jaydebeapi.connect("org.apache.hive.jdbc.HiveDriver", url)
+    #Connect to HiveServer2
+    def __str__(self):
+
+        conn = jaydebeapi.connect("org.apache.hive.jdbc.HiveDriver", self.url)
         cursor = conn.cursor()
         return cursor
-
-    # Execute SQL query
-    def run_query(self, sql, cursor):
-
-        sql="select * from item limit 10"
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        return results
