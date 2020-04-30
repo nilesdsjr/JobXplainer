@@ -3,7 +3,7 @@ from singleton import Singleton
 
 
 @Singleton
-class HiveConnection(object):
+class HiveClient(object):
     def __init__(self, config):
 
         self.database = config['profile']['hive']['jdbc']['database']
@@ -17,8 +17,13 @@ class HiveConnection(object):
                     "/" + self.database + ";principal=" + self.principal + ";")
 
     #Connect to HiveServer2
-    def __str__(self):
+    def get_conn(self):
 
-        conn = jaydebeapi.connect("org.apache.hive.jdbc.HiveDriver", self.url)
-        cursor = conn.cursor()
-        return cursor
+        self.conn = jaydebeapi.connect("org.apache.hive.jdbc.HiveDriver",
+                                       self.url)
+        self.cursor = self.conn.cursor()
+
+        return self.cursor
+
+    def close(self):
+        self.conn.close()
