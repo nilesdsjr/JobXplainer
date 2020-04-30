@@ -8,12 +8,13 @@ minimum_version: 1.0
 profile:
   hive:
     jdbc:
-      database: testtdb
+      database: default
       driver: org.apache.hive.jdbc.HiveDriver
-      server: 192.168.200.100
-      principal: hive/example.domain.com@DOMAIN.COM.
-      port: 10000
+      server: 
+      principal: 
+      port: 10001
   logging:
-    specify_path: False
-    path_to_file:
+    specify_log_path: False
+    path_to_dir: #Coloque aqui o caminho caso queira especificar um diretório para saída dos arquivos de log. Lembre de mudar specify_path para True.
   kerberos:
+    keytab: /home/{username}/{username}.keytab
