@@ -8,10 +8,11 @@ minimum_version: 1.0
 profile:
   hive:
     jdbc:
+      dependencies:
       database: default
       driver: org.apache.hive.jdbc.HiveDriver
-      server: 
-      principal: 
+      server: test
+      principal: tester:1221@trsadf.re
       port: 10001
   logging:
     specify_log_path: False
