@@ -26,8 +26,8 @@ class CliController:
         self.p = self.parser.parse_args()
         default_f = self.all_defaults['sql_file']
         default_d = self.all_defaults['sql_dir']
-        default_sql_file = os.path.join(self.settings.ROOT_DIR, default_f )
-        default_sql_dir = os.path.join(self.settings.ROOT_DIR, default_d )
+        default_sql_file = os.path.join(self.settings.CONFIG_PATH, default_f )
+        default_sql_dir = os.path.join(self.settings.CONFIG_PATH, default_d )
 
         if self.p.sql_file == 'xplain_this.sql' and self.p.sql_dir == 'sql_scripts/':
             
@@ -49,6 +49,11 @@ class CliController:
             self.sql_dir = self.p.sql_dir
             self.log.info('Caminho para diretório SQL carregado.')
             self.sql_exec = 'dir'
+        
+        elif self.p.sql_file != 'xplain_this.sql' and self.p.sql_dir != 'sql_scripts/':
+
+            self.log.error('Apenas um dos argumentos -f ou -d será aceito.')
+            raise AttributeError('Apenas um dos argumentos -f ou -d será aceito.')
 
         cli_options = {
             'sql_metadata' : {
@@ -109,7 +114,7 @@ if __name__ == '__main__':
         dest='sql_file',
         default='xplain_this.sql',
         help=
-        'Aceita caminho para um arquivo SQL, exemplo: /path/to/file/xplain_this.sql (default: ./xplain_this.sql)'
+        'Aceita caminho para um arquivo SQL, exemplo: /path/to/file/xplain_this.sql (default: resources/xplain_this.sql)'
     )
 
     parser.add_argument(
@@ -118,7 +123,7 @@ if __name__ == '__main__':
         dest='sql_dir',
         default='sql_scripts/',
         help=
-        'Caminho para diretório com arquivos SQL, exemplo: /path/to/directory/sql_scripts/ (default: ./sql_scripts/)'
+        'Caminho para diretório com arquivos SQL, exemplo: /path/to/directory/sql_scripts/ (default: resources/sql_scripts/)'
     )
 
     parser.add_argument(
@@ -127,7 +132,7 @@ if __name__ == '__main__':
         dest='silent_logger',
         default='yes',
         help=
-        'Log silencioso para arquivo ou também exibir na linha de comando. yes ou no. (default: yes)'
+        'Log silencioso para arquivo ou exibir na linha de comando. yes ou no. (default: yes)'
     )
 
     parser.add_argument(
@@ -135,7 +140,7 @@ if __name__ == '__main__':
         dest='log_dir',
         default='LOG_DIR',
         help=
-        'Pasta destino dos arquivos de LOG. (default: ./LOGS/)'
+        'Pasta destino dos arquivos de LOG. (default: LOGS/)'
     )    
 
     main(parser)
