@@ -11,12 +11,10 @@ class Settings:
 
     def __init__(self, root_file=__file__):
 
+
         self.ROOT_DIR = os.path.dirname(os.path.abspath(root_file))
-        self.CONFIG_PATH = os.path.join(
-            os.path.abspath(os.path.join(self.ROOT_DIR, os.pardir)),
-            'resources')
-        self.LOG_DIR = os.path.join(
-            os.path.abspath(os.path.join(self.ROOT_DIR, os.pardir)), 'LOGS')
+        self.CONFIG_PATH = os.path.join(os.path.abspath(os.path.join(self.ROOT_DIR, os.pardir)), 'resources')
+        self.LOG_DIR = os.path.join(os.path.abspath(os.path.join(self.ROOT_DIR, os.pardir)), 'LOGS')
 
 
 class LogStream:
@@ -32,37 +30,30 @@ class LogStream:
         self.log_dir = settings.LOG_DIR
 
 
-    def log_stream(self, origin, to_file=True, _log_dir=settings.LOG_DIR):
+    def log_stream(self, origin, _log_dir=settings.LOG_DIR):
 
 
         log = logging.getLogger(origin)
         log.setLevel(logging.DEBUG)
 
-        if to_file:
+        if not os.path.isdir(_log_dir):
 
-            if not os.path.isdir(_log_dir):
+            os.makedirs(_log_dir)
 
-                os.makedirs(_log_dir)
-
-            handler = logging.FileHandler(os.path.join(_log_dir, '{}_jobXplainer_{}.log'.format(origin, ((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss')))))
-
-        else:
-
-            handler = logging.StreamHandler(sys.stdout)
-
+        handler = logging.FileHandler(os.path.join(_log_dir, '{}_jobXplainer.log'.format(origin, )))
         handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
-        log.addHandler(handler)
-
-        if log.hasHandlers():
+        
+        if log.handlers:
             
             log.info('Logging Handler para {} encontrado!'.format(origin))
 
         else: 
 
-            log.info('Logging Handler para {} não encontrado. Novo handler adicionado!'.format(origin))
-        
+            log.addHandler(handler)
+            log.info('Novo logging Handler para {} adicionado!'.format(origin))
+
         return log
 
 
@@ -77,7 +68,6 @@ class LogStream:
             
             root = logging.getLogger()
             root.setLevel(logging.DEBUG)
-            handler = logging.FileHandler(os.path.join(_log_dir, 'All_jobXplainer_{}.log'.format((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss'))))
             handler = logging.StreamHandler(sys.stdout)
             handler.setLevel(logging.DEBUG)
             formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
