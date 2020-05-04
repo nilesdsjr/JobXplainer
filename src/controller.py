@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import logging
-from model import Model
+from model import ModelJobxplainer
 from settings import Settings, LogStream, Configuration
 
 
@@ -19,16 +19,13 @@ class CliController:
         self.parser = parser
         p = self.parser.parse_args()       
         self.all_defaults = {key: parser.get_default(key) for key in vars(p)}
-        print(self.all_defaults)
 
 
     def cli_options(self):
 
         self.p = self.parser.parse_args()
         default_f = self.all_defaults['sql_file']
-        print(default_f)
         default_d = self.all_defaults['sql_dir']
-        print(default_d)
         default_sql_file = os.path.join(self.settings.ROOT_DIR, default_f )
         default_sql_dir = os.path.join(self.settings.ROOT_DIR, default_d )
 
@@ -36,8 +33,8 @@ class CliController:
             
             self.sql_file = default_sql_file
             self.sql_dir = default_sql_dir
-            self.log.warn('Nenhum parâmetro recebido. Execução default carregada.')
-            self.sql_exec = 'Default'
+            self.log.warning('Nenhum parâmetro recebido. Execução default carregada.')
+            self.sql_exec = 'default'
 
         elif self.p.sql_file != 'xplain_this.sql' and self.p.sql_dir == 'sql_scripts/':
 
@@ -57,7 +54,7 @@ class CliController:
             'sql_metadata' : {
                 'path_file' : self.sql_file,
                 'path_dir' : self.sql_dir,
-                'exec' : self.sql_exec
+                'exec_type' : self.sql_exec
             },
         }
 
@@ -66,40 +63,37 @@ class CliController:
 
 def main(parser):
 
+
     settings = Settings()
     _config = Configuration()
     config = _config.load_config(path_config=settings.CONFIG_PATH)
     p = parser.parse_args()
-
     specify_log_path = config['profile']['logging']['specify_log_path']
     path_to_log_dir = config['profile']['logging']['path_to_dir']
-
     _root_log = LogStream()
 
     if p.log_dir == 'LOG_DIR' and not specify_log_path:
 
-        print(1)
         log = _root_log.root_logger(silent_logger=p.silent_logger)
 
     elif p.log_dir == 'LOG_DIR' and specify_log_path:
 
-        print(2)
         log = _root_log.root_logger(silent_logger=p.silent_logger, _log_dir=path_to_log_dir)
         
     elif p.log_dir != 'LOG_DIR' and not specify_log_path:
-        print(3)    
+        
         log = _root_log.root_logger(silent_logger=p.silent_logger, _log_dir=p.log_dir)
 
-
     cliController = CliController(parser)
-
     cli_options = cliController.cli_options()
+    
+    if not len(sys.argv) > 1: 
+        
+        log.info('Você não acionou nenhum parâmetro. Execute --help para saber opções. Execução padrão iniciada.')
 
-
-    if not len(sys.argv) > 1: log.info('Você não acionou nenhum parâmetro. Execute --help para saber opções. Execução padrão iniciada.')
-
-    model = Model(cli_options)
+    model = ModelJobxplainer(cli_options)
     model.run()
+
 
 if __name__ == '__main__':
 
