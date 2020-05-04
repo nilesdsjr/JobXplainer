@@ -1,0 +1,1 @@
+SELECT * from 02 where anomes=23422
