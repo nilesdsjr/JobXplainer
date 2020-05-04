@@ -21,14 +21,19 @@ class Settings:
 
 class LogStream:
 
+
     settings = Settings()
 
+
     def __init__(self, specify_log_path=False, settings=settings):
+
 
         self.specify_log_path = specify_log_path
         self.log_dir = settings.LOG_DIR
 
+
     def log_stream(self, origin, to_file=True, _log_dir=settings.LOG_DIR):
+
 
         log = logging.getLogger(origin)
         log.setLevel(logging.DEBUG)
@@ -39,24 +44,27 @@ class LogStream:
 
                 os.makedirs(_log_dir)
 
-            handler = logging.FileHandler(
-                os.path.join(
-                    _log_dir, origin + '_jobXplainer_' +
-                    ((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss')) +
-                    '.log'))
+            handler = logging.FileHandler(os.path.join(_log_dir, '{}_jobXplainer_{}.log'.format(origin, ((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss')))))
 
         else:
 
             handler = logging.StreamHandler(sys.stdout)
 
         handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         log.addHandler(handler)
-        log.info('Logging Handler para {} adicionado!'.format(origin))
 
+        if log.hasHandlers():
+            
+            log.info('Logging Handler para {} encontrado!'.format(origin))
+
+        else: 
+
+            log.info('Logging Handler para {} não encontrado. Novo handler adicionado!'.format(origin))
+        
         return log
+
 
     def root_logger(self, silent_logger='yes', _log_dir=settings.LOG_DIR):
 
@@ -66,13 +74,13 @@ class LogStream:
             os.makedirs(_log_dir)
 
         if silent_logger == 'no': 
-            print(silent_logger)
+            
             root = logging.getLogger()
             root.setLevel(logging.DEBUG)
+            handler = logging.FileHandler(os.path.join(_log_dir, 'All_jobXplainer_{}.log'.format((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss'))))
             handler = logging.StreamHandler(sys.stdout)
             handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             handler.setFormatter(formatter)
             root.addHandler(handler)
             root.info('Logging Handler para stdout_jobXplainer adicionado!')
@@ -81,15 +89,9 @@ class LogStream:
         
             root = logging.getLogger()
             root.setLevel(logging.DEBUG)
-    
-            handler = logging.FileHandler(
-                os.path.join(
-                    _log_dir, 'All_jobXplainer_' +
-                    ((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss')) + '.log'))
-    
+            handler = logging.FileHandler(os.path.join(_log_dir, 'All_jobXplainer_{}.log'.format((datetime.now()).strftime('%Y_%m_%d_%Hh%Mm%Ss'))))
             handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             handler.setFormatter(formatter)
             root.addHandler(handler)
             root.info('Logging Handler para All_jobXplainer adicionado!')
@@ -97,8 +99,9 @@ class LogStream:
             return root
 
         elif silent_logger not in ('no', 'yes'):
-            
-            print('Valor {} silent logger não reconhecido'.format(silent_logger))
+
+            root.error('Argumento -s "{}" não existe.'.format(silent_logger))
+            raise AttributeError('Argumento -s "{}" não existe.'.format(silent_logger))
 
 
 class Configuration:
@@ -117,19 +120,13 @@ class Configuration:
 
         if len(_path_config_file) > 1:
 
-            log.error(
-                'Mais de um arquivo jobXplainer.yaml foi identificado. \n Confira os arquivos em '
-                + path_config)
-
-            exit()
+            log.error('Mais de um arquivo jobXplainer.yaml foi identificado. Confira os arquivos em {}'.format(path_config))
+            raise AttributeError('Mais de um .yaml encontrado em {}'.format(path_config))
 
         elif len(_path_config_file) < 1:
 
-            log.error(
-                'Nenhum arquivo de configuração jobXplainer.yaml encontrado.\n Confira em '
-                + path_config)
-
-            exit()
+            log.error('Nenhum arquivo de configuração jobXplainer.yaml encontrado. Confira em {}'.format(path_config))
+            raise AttributeError('Nenhum .yaml encontrado em {}'.format(path_config))
 
         log.info('Carregando arquivo de configuration.')
         path_config_file = os.path.join(path_config, _path_config_file[0])
@@ -140,13 +137,13 @@ class Configuration:
 
                 config = yaml.safe_load(yml)
 
-        except Exception as e:
+        except IOError as e:
 
             log.error('Carregamento de arquivo yaml falhou. Confira em ' +
                       path_config,
                       exec_info=True)
 
-            raise (e)
+            raise(e)
 
         log.info('Arquivo de configuration carregado.')
 
@@ -154,6 +151,8 @@ class Configuration:
 
 
 class Security:
+
+
     def __init__(self):
 
         settings = Settings()
