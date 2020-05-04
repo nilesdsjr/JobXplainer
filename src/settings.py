@@ -90,7 +90,6 @@ class LogStream:
 
         elif silent_logger not in ('no', 'yes'):
 
-            root.error('Argumento -s "{}" não existe.'.format(silent_logger))
             raise AttributeError('Argumento -s "{}" não existe.'.format(silent_logger))
 
 
