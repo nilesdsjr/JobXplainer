@@ -112,7 +112,7 @@ class ModelJobxplainer:
 
         sql_dir = self.get_sql_dir()
         sqls = {sql_file:self.get_query(sql_file) for sql_file in sql_dir}
-        _xplain = [self.get_explain(sql) for sql in sqls]
+        _xplain = {key:self.get_explain(value) for key, value in sqls.items()}
 
         return _xplain
 
@@ -128,7 +128,6 @@ class ModelJobxplainer:
             try:
 
                 xplain = self._exec_file()
-                print(xplain)
 
             except:
 
@@ -137,20 +136,17 @@ class ModelJobxplainer:
             try:
 
                 xplain = self._exec_dir()
-                print(xplain)
 
             except Exception as e:
 
                 self.log.error('Execução Default sem dados de entrada. Você precisa fornecer algum script sql.', exc_info=True)
+                
                 raise e
-
 
         elif sql_exe_type == 'file':
 
                 xplain = self._exec_file()
-                print(xplain)
 
         elif sql_exe_type == 'dir':
                 
                 xplain = self._exec_dir()
-                print(xplain)
