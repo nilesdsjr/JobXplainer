@@ -8,14 +8,18 @@ minimum_version: 1.0
 profile:
   hive:
     jdbc:
+      AuthMech: 1
       dependencies:
       database: default
-      driver: org.apache.hive.jdbc.HiveDriver
-      server: test
-      principal: tester:1221@trsadf.re
+      driver: com.cloudera.hive.jdbc4.HS2Driver
       port: 10001
+      principal: localhost@trsadf.re
+      server: myserver.my.domain
   logging:
     specify_log_path: False
     path_to_dir: #Coloque aqui o caminho caso queira especificar um diretório para saída dos arquivos de log. Lembre de mudar specify_path para True.
   kerberos:
     keytab: /home/{username}/{username}.keytab
+    krbRealm: hadoop.local.host
+    krbHostFQDN: localhost
+    krbServiceName: hive
