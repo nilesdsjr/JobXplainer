@@ -3,6 +3,7 @@ import sys
 import logging
 import yaml
 import getpass
+from subprocess import Popen, PIPE
 from datetime import datetime
 
 
@@ -147,13 +148,23 @@ class Security:
         settings = Settings()
         configuration = Configuration()
         config = configuration.load_config(settings.CONFIG_PATH)
-        ktb_path = config['profile']['kerberos']['keytab']
-        self.ktb_path = ktb_path.format(username=getpass.getuser())
+        _ktab_path = config['profile']['kerberos']['keytab']
+        self.krbRealm = config['profile']['kerberos']['KrbRealm']
+        _krbHostFQDN = config['profile']['kerberos']['KrbHostFQDN']
+        _krbServiceName = config['profile']['kerberos']['KrbServiceName']
+        self.username = getpass.getuser()
+        self.ktab_path = _ktab_path.format(username=self.username)
 
     def kbrs_auth(self):
 
         pass
 
-    def set_kinit(self, ktb_path):
+    def set_kinit(self):
 
-        pass
+
+        kinit = '/usr/bin/kinit'
+        kinit_args = [ kinit, '{}@{}'.format(self.username, self.krbRealm) ]
+        kinit = Popen(kinit_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        kinit.stdin.write('%s\n' % 'password')
+        kinit.communicate()
+        kinit.wait()
