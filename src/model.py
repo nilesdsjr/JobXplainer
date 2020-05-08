@@ -65,21 +65,54 @@ class ModelJobxplainer:
             raise AttributeError('Diretório para arquivos sql não existe.')
 
 
-    def get_query(self, sql_file):
+    def get_queries(self, sql_file):
         
 
         try:
 
             with open(sql_file, 'r') as f:
-                sql = f.read()
+                big_string = f.read()
             f.close()
 
         except IOError('Erro crítico ao tentar abrir arquivo sql.') as io:
 
             self.log.error('Erro crítico ao tentar abrir arquivo sql.', exec_info=True)
             raise io
+        
+        if not big_string:
 
-        return sql
+            self.log.warning('Arquivo {} está vazio.'.format(sql_file))
+            return big_string
+        
+        query.splitlines()
+
+        d = ';'
+        queries =  [e+d for e in big_string.split(d) if e]
+    
+        print(queries)
+
+        out = {}
+
+        expression = "(SELECT(.*);)"
+
+        clean_queries = [' '.join(query.splitlines()) for query in queries]
+        
+        
+        for query in clean_queries:
+
+            result = re.search(expression, query, re.IGNORECASE)
+            
+            if result:
+                
+                out[sql_file] = {
+                    query : {
+                    'explainable' : result.group(1)
+                },
+            }
+
+        print('SEU DICT')
+        print(out)
+    
 
 
     def save_response(self):
@@ -101,7 +134,7 @@ class ModelJobxplainer:
 
 
         sql_file = self.get_sql_file()
-        sql = self.get_query(sql_file)
+        sql = self.get_queries(sql_file)
         _xplain = self.get_explain(sql)
 
         return _xplain
@@ -111,7 +144,7 @@ class ModelJobxplainer:
 
 
         sql_dir = self.get_sql_dir()
-        sqls = {sql_file:self.get_query(sql_file) for sql_file in sql_dir}
+        sqls = {sql_file:self.get_queries(sql_file) for sql_file in sql_dir}
         _xplain = {key:self.get_explain(value) for key, value in sqls.items()}
 
         return _xplain
