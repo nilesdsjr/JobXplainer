@@ -5,6 +5,7 @@ from datetime import datetime
 from settings import LogStream
 from connections import HiveClient
 
+
 class ModelJobxplainer:
 
 
@@ -83,35 +84,29 @@ class ModelJobxplainer:
 
             self.log.warning('Arquivo {} está vazio.'.format(sql_file))
             return big_string
-        
-        query.splitlines()
 
-        d = ';'
-        queries =  [e+d for e in big_string.split(d) if e]
-    
-        print(queries)
 
-        out = {}
-
+        queries_out = {}
         expression = "(SELECT(.*);)"
+        clean_string = ' '.join(big_string.splitlines())
+        d = ';'
+        queries =  [e+d for e in clean_string.split(d) if e]
+        clean_queries = {count:query for count, query in enumerate(queries)}
 
-        clean_queries = [' '.join(query.splitlines()) for query in queries]
+
         
-        
-        for query in clean_queries:
+        for id, query in clean_queries.items():
 
             result = re.search(expression, query, re.IGNORECASE)
             
             if result:
                 
-                out[sql_file] = {
-                    query : {
+                queries_out[id] = {
+                    'query' : query,
                     'explainable' : result.group(1)
-                },
-            }
-
-        print('SEU DICT')
-        print(out)
+                }
+        
+        return queries_out
     
 
 
@@ -121,14 +116,21 @@ class ModelJobxplainer:
         pass
 
 
-    def get_explain(self, sql):
-        
+    def get_explain(self, sqls):
+
 
         hive = HiveClient()
-        result = hive.execute(sql)
+        for key in sqls.keys():
 
+            _sqls = dict(sqls[key]['all_queries'])
+            
+            for key in _sqls.keys():
+
+                _explainable = _sqls[key]['explainable']
+                result = hive.execute(_explainable)
 
         return result
+
 
     def _exec_file(self):
 
@@ -144,8 +146,16 @@ class ModelJobxplainer:
 
 
         sql_dir = self.get_sql_dir()
-        sqls = {sql_file:self.get_queries(sql_file) for sql_file in sql_dir}
-        _xplain = {key:self.get_explain(value) for key, value in sqls.items()}
+        sqls = {}
+
+        for count, sql_file in enumerate(sql_dir):
+
+            sqls[count] = {
+                'sql_file' : sql_file,
+                'all_queries': self.get_queries(sql_file)
+                } 
+
+        _xplain = {key:self.get_explain(sqls) for key, value in sqls.items() if value['all_queries']}
 
         return _xplain
 
