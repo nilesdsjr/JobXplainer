@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import pandas as pd
 from datetime import datetime
 from settings import LogStream
 from connections import HiveClient
@@ -193,3 +194,4 @@ class ModelJobxplainer:
         elif sql_exe_type == 'dir':
                 
                 xplain = self._exec_dir()
+                dt_xplain = pd.DataFrame.from_dict(xplain)
